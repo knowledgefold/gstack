@@ -460,7 +460,7 @@ $B text
 Verify the page has content (not blank, not a generic error page).
 
 ```bash
-$B snapshot -i -a -o ".gstack/deploy-reports/post-deploy.png"
+$B snapshot -i -a -o ".gstack/$BRANCH/land-deploy-screenshot.png"
 ```
 
 Take an annotated screenshot as evidence.
@@ -506,7 +506,7 @@ After a successful revert, note the revert commit SHA and continue to Step 9 wit
 Create the deploy report directory:
 
 ```bash
-mkdir -p .gstack/deploy-reports
+mkdir -p .gstack/$BRANCH
 ```
 
 Produce and display the ASCII summary:
@@ -537,13 +537,12 @@ Verification: <HEALTHY / DEGRADED / SKIPPED / REVERTED>
 VERDICT: <DEPLOYED AND VERIFIED / DEPLOYED (UNVERIFIED) / REVERTED>
 ```
 
-Save report to `.gstack/deploy-reports/{date}-pr{number}-deploy.md`.
+Save report to `.gstack/$BRANCH/land-deploy-report-{datetime}.md`.
 
 Log to the review dashboard:
 
 ```bash
-eval $(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)
-mkdir -p ~/.gstack/projects/$SLUG
+mkdir -p .gstack/$BRANCH
 ```
 
 Write a JSONL entry with timing data:

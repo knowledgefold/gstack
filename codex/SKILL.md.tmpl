@@ -207,7 +207,7 @@ Ask Codex anything about the codebase. Supports session continuity for follow-up
 
 1. **Check for existing session:**
 ```bash
-cat .context/codex-session-id 2>/dev/null || echo "NO_SESSION"
+cat .gstack/$BRANCH/codex-session-id.txt 2>/dev/null || echo "NO_SESSION"
 ```
 
 If a session file exists (not `NO_SESSION`), use AskUserQuestion:
@@ -284,10 +284,10 @@ codex exec resume <session-id> "<prompt>" -s read-only -c 'model_reasoning_effor
 5. Capture session ID from the streamed output. The parser prints `SESSION_ID:<id>`
    from the `thread.started` event. Save it for follow-ups:
 ```bash
-mkdir -p .context
+mkdir -p .gstack/$BRANCH
 ```
 Save the session ID printed by the parser (the line starting with `SESSION_ID:`)
-to `.context/codex-session-id`.
+to `.gstack/$BRANCH/codex-session-id.txt`.
 
 6. Present the full streamed output:
 

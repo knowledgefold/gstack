@@ -74,8 +74,7 @@ After the user chooses, execute their choice (commit or stash), then continue wi
 **Create output directories:**
 
 ```bash
-REPORT_DIR=".gstack/design-reports"
-mkdir -p "$REPORT_DIR/screenshots"
+mkdir -p .gstack/$BRANCH/design-review-screenshots
 ```
 
 ---
@@ -91,9 +90,9 @@ Record baseline design score and AI slop score at end of Phase 6.
 ## Output Structure
 
 ```
-.gstack/design-reports/
-├── design-audit-{domain}-{YYYY-MM-DD}.md    # Structured report
-├── screenshots/
+.gstack/{branch}/
+├── design-review-audit-{datetime}.md    # Structured report
+├── design-review-screenshots/
 │   ├── first-impression.png                  # Phase 1
 │   ├── {page}-annotated.png                  # Per-page annotated
 │   ├── {page}-mobile.png                     # Responsive
@@ -214,15 +213,13 @@ After all fixes are applied:
 
 ## Phase 10: Report
 
-Write the report to both local and project-scoped locations:
+Write the report to `.gstack/$BRANCH/`:
 
-**Local:** `.gstack/design-reports/design-audit-{domain}-{YYYY-MM-DD}.md`
-
-**Project-scoped:**
 ```bash
-source <(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null) && mkdir -p ~/.gstack/projects/$SLUG
+mkdir -p .gstack/$BRANCH
 ```
-Write to `~/.gstack/projects/{slug}/{user}-{branch}-design-audit-{datetime}.md`
+
+**Report:** `.gstack/$BRANCH/design-review-audit-{datetime}.md`
 
 **Per-finding additions** (beyond standard design audit report):
 - Fix Status: verified / best-effort / reverted / deferred
