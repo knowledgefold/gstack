@@ -18,17 +18,16 @@ allowed-tools:
 Remove the edit restriction set by `/freeze`, allowing edits to all directories.
 
 ```bash
-mkdir -p ~/.gstack/analytics
-echo '{"skill":"unfreeze","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
+mkdir -p .gstack/$BRANCH
+echo '{"skill":"unfreeze","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> .gstack/$BRANCH/analytics-unfreeze.jsonl 2>/dev/null || true
 ```
 
 ## Clear the boundary
 
 ```bash
-STATE_DIR="${CLAUDE_PLUGIN_DATA:-$HOME/.gstack}"
-if [ -f "$STATE_DIR/freeze-dir.txt" ]; then
-  PREV=$(cat "$STATE_DIR/freeze-dir.txt")
-  rm -f "$STATE_DIR/freeze-dir.txt"
+if [ -f ".gstack/$BRANCH/freeze-dir.txt" ]; then
+  PREV=$(cat .gstack/$BRANCH/freeze-dir.txt)
+  rm -f .gstack/$BRANCH/freeze-dir.txt
   echo "Freeze boundary cleared (was: $PREV). Edits are now allowed everywhere."
 else
   echo "No freeze boundary was set."

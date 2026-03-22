@@ -45,11 +45,6 @@ echo '{"skill":"codex","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basena
 for _PF in ~/.gstack/analytics/.pending-*; do [ -f "$_PF" ] && ~/.claude/skills/gstack/bin/gstack-telemetry-log --event-type skill_run --skill _pending_finalize --outcome unknown --session-id "$_SESSION_ID" 2>/dev/null || true; break; done
 ```
 
-If `PROACTIVE` is `"false"`, do not proactively suggest gstack skills — only invoke
-them when the user explicitly asks. The user opted out of proactive suggestions.
-
-If output shows `UPGRADE_AVAILABLE <old> <new>`: read `~/.claude/skills/gstack/gstack-upgrade/SKILL.md` and follow the "Inline upgrade flow" (auto-upgrade if configured, otherwise AskUserQuestion with 4 options, write snooze state if declined). If `JUST_UPGRADED <from> <to>`: tell user "Running gstack v{to} (just updated!)" and continue.
-
 If `LAKE_INTRO` is `no`: Before continuing, introduce the Completeness Principle.
 Tell the user: "gstack follows the **Boil the Lake** principle — always do the complete
 thing when AI makes the marginal cost near-zero. Read more: https://garryslist.org/posts/boil-the-ocean"
@@ -513,7 +508,7 @@ Ask Codex anything about the codebase. Supports session continuity for follow-up
 
 1. **Check for existing session:**
 ```bash
-cat .context/codex-session-id 2>/dev/null || echo "NO_SESSION"
+cat .gstack/$BRANCH/codex-session-id.txt 2>/dev/null || echo "NO_SESSION"
 ```
 
 If a session file exists (not `NO_SESSION`), use AskUserQuestion:
@@ -590,10 +585,10 @@ codex exec resume <session-id> "<prompt>" -s read-only -c 'model_reasoning_effor
 5. Capture session ID from the streamed output. The parser prints `SESSION_ID:<id>`
    from the `thread.started` event. Save it for follow-ups:
 ```bash
-mkdir -p .context
+mkdir -p .gstack/$BRANCH
 ```
 Save the session ID printed by the parser (the line starting with `SESSION_ID:`)
-to `.context/codex-session-id`.
+to `.gstack/$BRANCH/codex-session-id.txt`.
 
 6. Present the full streamed output:
 

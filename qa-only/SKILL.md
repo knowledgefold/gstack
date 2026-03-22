@@ -44,11 +44,6 @@ echo '{"skill":"qa-only","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(base
 for _PF in ~/.gstack/analytics/.pending-*; do [ -f "$_PF" ] && ~/.claude/skills/gstack/bin/gstack-telemetry-log --event-type skill_run --skill _pending_finalize --outcome unknown --session-id "$_SESSION_ID" 2>/dev/null || true; break; done
 ```
 
-If `PROACTIVE` is `"false"`, do not proactively suggest gstack skills — only invoke
-them when the user explicitly asks. The user opted out of proactive suggestions.
-
-If output shows `UPGRADE_AVAILABLE <old> <new>`: read `~/.claude/skills/gstack/gstack-upgrade/SKILL.md` and follow the "Inline upgrade flow" (auto-upgrade if configured, otherwise AskUserQuestion with 4 options, write snooze state if declined). If `JUST_UPGRADED <from> <to>`: tell user "Running gstack v{to} (just updated!)" and continue.
-
 If `LAKE_INTRO` is `no`: Before continuing, introduce the Completeness Principle.
 Tell the user: "gstack follows the **Boil the Lake** principle — always do the complete
 thing when AI makes the marginal cost near-zero. Read more: https://garryslist.org/posts/boil-the-ocean"
@@ -252,8 +247,8 @@ You are a QA engineer. Test web applications like a real user — click everythi
 | Parameter | Default | Override example |
 |-----------|---------|-----------------:|
 | Target URL | (auto-detect or required) | `https://myapp.com`, `http://localhost:3000` |
-| Mode | full | `--quick`, `--regression .gstack/qa-reports/baseline.json` |
-| Output dir | `.gstack/qa-reports/` | `Output to /tmp/qa` |
+| Mode | full | `--quick`, `--regression .gstack/$BRANCH/qa-baseline-{datetime}.json` |
+| Output dir | `.gstack/$BRANCH/` | `Output to /tmp/qa` |
 | Scope | Full app (or diff-scoped) | `Focus on the billing page` |
 | Auth | None | `Sign in to user@example.com`, `Import cookies from cookies.json` |
 
@@ -283,8 +278,7 @@ If `NEEDS_SETUP`:
 **Create output directories:**
 
 ```bash
-REPORT_DIR=".gstack/qa-reports"
-mkdir -p "$REPORT_DIR/screenshots"
+mkdir -p .gstack/$BRANCH/qa-screenshots
 ```
 
 ---
@@ -293,10 +287,9 @@ mkdir -p "$REPORT_DIR/screenshots"
 
 Before falling back to git diff heuristics, check for richer test plan sources:
 
-1. **Project-scoped test plans:** Check `~/.gstack/projects/` for recent `*-test-plan-*.md` files for this repo
+1. **Project-scoped test plans:** Check `.gstack/$BRANCH/` for recent `*-test-plan-*.md` files for this repo
    ```bash
-   source <(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)
-   ls -t ~/.gstack/projects/$SLUG/*-test-plan-*.md 2>/dev/null | head -1
+   ls -t .gstack/$BRANCH/*-test-plan-*.md 2>/dev/null | head -1
    ```
 2. **Conversation context:** Check if a prior `/plan-eng-review` or `/plan-ceo-review` produced test plan output in this conversation
 3. **Use whichever source is richer.** Fall back to git diff analysis only if neither is available.
@@ -585,30 +578,31 @@ Minimum 0 per category.
 
 ## Output
 
-Write the report to both local and project-scoped locations:
+Write the report to `.gstack/$BRANCH/`:
 
-**Local:** `.gstack/qa-reports/qa-report-{domain}-{YYYY-MM-DD}.md`
-
-**Project-scoped:** Write test outcome artifact for cross-session context:
 ```bash
-source <(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null) && mkdir -p ~/.gstack/projects/$SLUG
+mkdir -p .gstack/$BRANCH
 ```
-Write to `~/.gstack/projects/{slug}/{user}-{branch}-test-outcome-{datetime}.md`
+
+**Report:** `.gstack/$BRANCH/qa-report-{datetime}.md`
+
+**Test outcome artifact:** `.gstack/$BRANCH/qa-only-test-outcome-{datetime}.md`
 
 ### Output Structure
 
 ```
-.gstack/qa-reports/
-├── qa-report-{domain}-{YYYY-MM-DD}.md    # Structured report
-├── screenshots/
-│   ├── initial.png                        # Landing page annotated screenshot
-│   ├── issue-001-step-1.png               # Per-issue evidence
+.gstack/{branch}/
+├── qa-report-{datetime}.md           # Structured report
+├── qa-only-test-outcome-{datetime}.md
+├── qa-screenshots/
+│   ├── initial.png                    # Landing page annotated screenshot
+│   ├── issue-001-step-1.png           # Per-issue evidence
 │   ├── issue-001-result.png
 │   └── ...
-└── baseline.json                          # For regression mode
+└── qa-baseline-{datetime}.json       # For regression mode
 ```
 
-Report filenames use the domain and date: `qa-report-myapp-com-2026-03-12.md`
+Report filename: `qa-report-20260322-143000.md`
 
 ---
 
