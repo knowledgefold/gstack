@@ -166,13 +166,6 @@ for _PF in ~/.gstack/analytics/.pending-*; do [ -f "$_PF" ] && ${ctx.paths.binDi
 \`\`\``;
 }
 
-function generateUpgradeCheck(ctx: TemplateContext): string {
-  return `If \`PROACTIVE\` is \`"false"\`, do not proactively suggest gstack skills — only invoke
-them when the user explicitly asks. The user opted out of proactive suggestions.
-
-If output shows \`UPGRADE_AVAILABLE <old> <new>\`: read \`${ctx.paths.skillRoot}/gstack-upgrade/SKILL.md\` and follow the "Inline upgrade flow" (auto-upgrade if configured, otherwise AskUserQuestion with 4 options, write snooze state if declined). If \`JUST_UPGRADED <from> <to>\`: tell user "Running gstack v{to} (just updated!)" and continue.`;
-}
-
 function generateLakeIntro(): string {
   return `If \`LAKE_INTRO\` is \`no\`: Before continuing, introduce the Completeness Principle.
 Tell the user: "gstack follows the **Boil the Lake** principle — always do the complete
@@ -382,7 +375,6 @@ never blocks the user.`;
 function generatePreamble(ctx: TemplateContext): string {
   return [
     generatePreambleBash(ctx),
-    generateUpgradeCheck(ctx),
     generateLakeIntro(),
     generateTelemetryPrompt(ctx),
     generateAskUserFormat(ctx),
