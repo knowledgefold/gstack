@@ -48,7 +48,7 @@ Expect first useful run in under 5 minutes on any repo with tests already set up
 
 Open Claude Code and paste this. Claude does the rest.
 
-> Install gstack: run **`git clone https://github.com/garrytan/gstack.git ~/.claude/skills/gstack && cd ~/.claude/skills/gstack && ./setup`** then add a "gstack" section to CLAUDE.md that says to use the /browse skill from gstack for all web browsing, never use mcp\_\_claude-in-chrome\_\_\* tools, and lists the available skills: /office-hours, /plan-ceo-review, /plan-eng-review, /plan-design-review, /design-consultation, /review, /ship, /land-and-deploy, /canary, /benchmark, /browse, /qa, /qa-only, /design-review, /setup-browser-cookies, /setup-deploy, /retro, /investigate, /document-release, /codex, /careful, /freeze, /guard, /unfreeze, /gstack-upgrade. Then ask the user if they also want to add gstack to the current project so teammates get it.
+> Install gstack: run **`git clone https://github.com/knowledgefold/gstack.git ~/.claude/skills/gstack && cd ~/.claude/skills/gstack && ./setup`** then add a "gstack" section to CLAUDE.md that says to use the /browse skill from gstack for all web browsing, never use mcp\_\_claude-in-chrome\_\_\* tools, and lists the available skills: /office-hours, /plan-ceo-review, /plan-eng-review, /plan-design-review, /design-consultation, /review, /ship, /land-and-deploy, /canary, /benchmark, /browse, /qa, /qa-only, /design-review, /setup-browser-cookies, /setup-deploy, /retro, /investigate, /document-release, /codex, /careful, /freeze, /guard, /unfreeze, /gstack-upgrade. Then ask the user if they also want to add gstack to the current project so teammates get it.
 
 ### Step 2: Add to your repo so teammates get it (optional)
 
@@ -61,14 +61,14 @@ Real files get committed to your repo (not a submodule), so `git clone` just wor
 gstack works on any agent that supports the [SKILL.md standard](https://github.com/anthropics/claude-code). Skills live in `.agents/skills/` and are discovered automatically.
 
 ```bash
-git clone https://github.com/garrytan/gstack.git ~/.codex/skills/gstack
+git clone https://github.com/knowledgefold/gstack.git ~/.codex/skills/gstack
 cd ~/.codex/skills/gstack && ./setup --host codex
 ```
 
 Or let setup auto-detect which agents you have installed:
 
 ```bash
-git clone https://github.com/garrytan/gstack.git ~/gstack
+git clone https://github.com/knowledgefold/gstack.git ~/gstack
 cd ~/gstack && ./setup --host auto
 ```
 
@@ -206,7 +206,7 @@ Same tools, different outcome — because gstack gives you structured roles and 
 
 The models are getting better fast. The people who figure out how to work with them now — really work with them, not just dabble — are going to have a massive advantage. This is that window. Let's go.
 
-Eighteen specialists and seven power tools. All slash commands. All Markdown. All free. **[github.com/garrytan/gstack](https://github.com/garrytan/gstack)** — MIT License
+Eighteen specialists and seven power tools. All slash commands. All Markdown. All free. **[github.com/knowledgefold/gstack](https://github.com/knowledgefold/gstack)** — MIT License
 
 > **We're hiring.** Want to ship 10K+ LOC/day and help harden gstack?
 > Come work at YC — [ycombinator.com/software](https://ycombinator.com/software)
