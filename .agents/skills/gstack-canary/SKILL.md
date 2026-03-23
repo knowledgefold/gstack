@@ -37,11 +37,6 @@ echo '{"skill":"canary","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basen
 for _PF in ~/.gstack/analytics/.pending-*; do [ -f "$_PF" ] && ~/.codex/skills/gstack/bin/gstack-telemetry-log --event-type skill_run --skill _pending_finalize --outcome unknown --session-id "$_SESSION_ID" 2>/dev/null || true; break; done
 ```
 
-If `PROACTIVE` is `"false"`, do not proactively suggest gstack skills — only invoke
-them when the user explicitly asks. The user opted out of proactive suggestions.
-
-If output shows `UPGRADE_AVAILABLE <old> <new>`: read `~/.codex/skills/gstack/gstack-upgrade/SKILL.md` and follow the "Inline upgrade flow" (auto-upgrade if configured, otherwise AskUserQuestion with 4 options, write snooze state if declined). If `JUST_UPGRADED <from> <to>`: tell user "Running gstack v{to} (just updated!)" and continue.
-
 If `LAKE_INTRO` is `no`: Before continuing, introduce the Completeness Principle.
 Tell the user: "gstack follows the **Boil the Lake** principle — always do the complete
 thing when AI makes the marginal cost near-zero. Read more: https://garryslist.org/posts/boil-the-ocean"
@@ -293,10 +288,8 @@ When the user types `/canary`, run this skill.
 ### Phase 1: Setup
 
 ```bash
-eval $(~/.codex/skills/gstack/bin/gstack-slug 2>/dev/null || echo "SLUG=unknown")
-mkdir -p .gstack/canary-reports
-mkdir -p .gstack/canary-reports/baselines
-mkdir -p .gstack/canary-reports/screenshots
+mkdir -p .gstack/$BRANCH/canary-baselines
+mkdir -p .gstack/$BRANCH/canary-screenshots
 ```
 
 Parse the user's arguments. Default duration is 10 minutes. Default pages: auto-discover from the app's navigation.
@@ -309,7 +302,7 @@ For each page (either from `--pages` or the homepage):
 
 ```bash
 $B goto <page-url>
-$B snapshot -i -a -o ".gstack/canary-reports/baselines/<page-name>.png"
+$B snapshot -i -a -o ".gstack/$BRANCH/canary-baselines/<page-name>.png"
 $B console --errors
 $B perf
 $B text
@@ -317,7 +310,7 @@ $B text
 
 Collect for each page: screenshot path, console error count, page load time from `perf`, and a text content snapshot.
 
-Save the baseline manifest to `.gstack/canary-reports/baseline.json`:
+Save the baseline manifest to `.gstack/$BRANCH/canary-baseline-{datetime}.json`:
 
 ```json
 {
@@ -363,7 +356,7 @@ For each page to monitor:
 
 ```bash
 $B goto <page-url>
-$B snapshot -i -a -o ".gstack/canary-reports/screenshots/pre-<page-name>.png"
+$B snapshot -i -a -o ".gstack/$BRANCH/canary-screenshots/pre-<page-name>.png"
 $B console --errors
 $B perf
 ```
@@ -376,7 +369,7 @@ Monitor for the specified duration. Every 60 seconds, check each page:
 
 ```bash
 $B goto <page-url>
-$B snapshot -i -a -o ".gstack/canary-reports/screenshots/<page-name>-<check-number>.png"
+$B snapshot -i -a -o ".gstack/$BRANCH/canary-screenshots/<page-name>-<check-number>.png"
 $B console --errors
 $B perf
 ```
@@ -433,18 +426,17 @@ Per-Page Results:
   /settings       HEALTHY     0         380ms
 
 Alerts Fired:  [N] (X critical, Y high, Z medium)
-Screenshots:   .gstack/canary-reports/screenshots/
+Screenshots:   .gstack/$BRANCH/canary-screenshots/
 
 VERDICT: [DEPLOY IS HEALTHY / DEPLOY HAS ISSUES — details above]
 ```
 
-Save report to `.gstack/canary-reports/{date}-canary.md` and `.gstack/canary-reports/{date}-canary.json`.
+Save report to `.gstack/$BRANCH/canary-report-{datetime}.md` and `.gstack/$BRANCH/canary-report-{datetime}.json`.
 
 Log the result for the review dashboard:
 
 ```bash
-eval $(~/.codex/skills/gstack/bin/gstack-slug 2>/dev/null)
-mkdir -p ~/.gstack/projects/$SLUG
+mkdir -p .gstack/$BRANCH
 ```
 
 Write a JSONL entry: `{"skill":"canary","timestamp":"<ISO>","status":"<HEALTHY/DEGRADED/BROKEN>","url":"<url>","duration_min":<N>,"alerts":<N>}`

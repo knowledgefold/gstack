@@ -40,11 +40,6 @@ echo '{"skill":"qa","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename 
 for _PF in ~/.gstack/analytics/.pending-*; do [ -f "$_PF" ] && ~/.codex/skills/gstack/bin/gstack-telemetry-log --event-type skill_run --skill _pending_finalize --outcome unknown --session-id "$_SESSION_ID" 2>/dev/null || true; break; done
 ```
 
-If `PROACTIVE` is `"false"`, do not proactively suggest gstack skills — only invoke
-them when the user explicitly asks. The user opted out of proactive suggestions.
-
-If output shows `UPGRADE_AVAILABLE <old> <new>`: read `~/.codex/skills/gstack/gstack-upgrade/SKILL.md` and follow the "Inline upgrade flow" (auto-upgrade if configured, otherwise AskUserQuestion with 4 options, write snooze state if declined). If `JUST_UPGRADED <from> <to>`: tell user "Running gstack v{to} (just updated!)" and continue.
-
 If `LAKE_INTRO` is `no`: Before continuing, introduce the Completeness Principle.
 Tell the user: "gstack follows the **Boil the Lake** principle — always do the complete
 thing when AI makes the marginal cost near-zero. Read more: https://garryslist.org/posts/boil-the-ocean"
@@ -268,8 +263,8 @@ You are a QA engineer AND a bug-fix engineer. Test web applications like a real 
 |-----------|---------|-----------------:|
 | Target URL | (auto-detect or required) | `https://myapp.com`, `http://localhost:3000` |
 | Tier | Standard | `--quick`, `--exhaustive` |
-| Mode | full | `--regression .gstack/qa-reports/baseline.json` |
-| Output dir | `.gstack/qa-reports/` | `Output to /tmp/qa` |
+| Mode | full | `--regression .gstack/$BRANCH/qa-baseline-{datetime}.json` |
+| Output dir | `.gstack/$BRANCH/` | `Output to /tmp/qa` |
 | Scope | Full app (or diff-scoped) | `Focus on the billing page` |
 | Auth | None | `Sign in to user@example.com`, `Import cookies from cookies.json` |
 
@@ -477,7 +472,7 @@ Only commit if there are changes. Stage all bootstrap files (config, test direct
 **Create output directories:**
 
 ```bash
-mkdir -p .gstack/qa-reports/screenshots
+mkdir -p .gstack/$BRANCH/qa-screenshots
 ```
 
 ---
@@ -486,10 +481,9 @@ mkdir -p .gstack/qa-reports/screenshots
 
 Before falling back to git diff heuristics, check for richer test plan sources:
 
-1. **Project-scoped test plans:** Check `~/.gstack/projects/` for recent `*-test-plan-*.md` files for this repo
+1. **Project-scoped test plans:** Check `.gstack/$BRANCH/` for recent `*-test-plan-*.md` files for this repo
    ```bash
-   source <(~/.codex/skills/gstack/bin/gstack-slug 2>/dev/null)
-   ls -t ~/.gstack/projects/$SLUG/*-test-plan-*.md 2>/dev/null | head -1
+   ls -t .gstack/$BRANCH/*-test-plan-*.md 2>/dev/null | head -1
    ```
 2. **Conversation context:** Check if a prior `/plan-eng-review` or `/plan-ceo-review` produced test plan output in this conversation
 3. **Use whichever source is richer.** Fall back to git diff analysis only if neither is available.
@@ -783,19 +777,19 @@ Record baseline health score at end of Phase 6.
 ## Output Structure
 
 ```
-.gstack/qa-reports/
-├── qa-report-{domain}-{YYYY-MM-DD}.md    # Structured report
-├── screenshots/
+.gstack/{branch}/
+├── qa-report-{datetime}.md    # Structured report
+├── qa-screenshots/
 │   ├── initial.png                        # Landing page annotated screenshot
 │   ├── issue-001-step-1.png               # Per-issue evidence
 │   ├── issue-001-result.png
 │   ├── issue-001-before.png               # Before fix (if fixed)
 │   ├── issue-001-after.png                # After fix (if fixed)
 │   └── ...
-└── baseline.json                          # For regression mode
+└── qa-baseline-{datetime}.json           # For regression mode
 ```
 
-Report filenames use the domain and date: `qa-report-myapp-com-2026-03-12.md`
+Report filename: `qa-report-20260322-143000.md`
 
 ---
 
@@ -888,7 +882,7 @@ The test MUST:
   ```
   // Regression: ISSUE-NNN — {what broke}
   // Found by /qa on {YYYY-MM-DD}
-  // Report: .gstack/qa-reports/qa-report-{domain}-{date}.md
+  // Report: .gstack/{branch}/qa-report-{datetime}.md
   ```
 
 Test type decision:
@@ -946,15 +940,15 @@ After all fixes are applied:
 
 ## Phase 10: Report
 
-Write the report to both local and project-scoped locations:
+Write the report to `.gstack/$BRANCH/`:
 
-**Local:** `.gstack/qa-reports/qa-report-{domain}-{YYYY-MM-DD}.md`
-
-**Project-scoped:** Write test outcome artifact for cross-session context:
 ```bash
-source <(~/.codex/skills/gstack/bin/gstack-slug 2>/dev/null) && mkdir -p ~/.gstack/projects/$SLUG
+mkdir -p .gstack/$BRANCH
 ```
-Write to `~/.gstack/projects/{slug}/{user}-{branch}-test-outcome-{datetime}.md`
+
+**Report:** `.gstack/$BRANCH/qa-report-{datetime}.md`
+
+**Test outcome artifact (for cross-session context):** `.gstack/$BRANCH/qa-test-outcome-{datetime}.md`
 
 **Per-issue additions** (beyond standard report template):
 - Fix Status: verified / best-effort / reverted / deferred
